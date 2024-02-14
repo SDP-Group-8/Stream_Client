@@ -7,7 +7,6 @@ async function getOffer() {
             }
         })
     const connection_offer = response.json()
-    console.log(connect)
     createPeer(connection_offer.sdp, connection_offer.type)
 }
 
