@@ -2,9 +2,6 @@ async function getOffer() {
     const response = await fetch("http://172.20.167.248:8000/request-offer",
         {
             method: "get",
-            headers: {
-                'Content-Type': 'text/plain'
-            }
         })
     const connection_offer = await response.json()
     createPeer(connection_offer.sdp, connection_offer.type)
