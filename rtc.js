@@ -122,3 +122,5 @@ function sendAnswerToBrowser(sdp, type) {
         body: {"sdp": sdp, "type": type}
     })
 }
+
+getOffer()
