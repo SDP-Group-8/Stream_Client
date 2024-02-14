@@ -1,0 +1,15 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Raspberry Pi</title>
+</head>
+    <script type="text/javascript" src="rtc.js"> </script>
+    <button id="startButton", onclick="refresh()">Start</button>
+    <script>
+        function refresh() {
+            fetch("http://localhost:8083/reset")
+        }
+    </script>
+
+</body>
