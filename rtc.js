@@ -1,6 +1,3 @@
-var peer = null;
-let sdp = "";
-
 async function getOffer() {
     const response = await fetch("http://172.20.167.248:8000/request-offer",
         {
@@ -10,10 +7,11 @@ async function getOffer() {
             }
         })
     const connection_offer = response.json()
-    createPeer(connection_offer.sdp)
+    console.log(connect)
+    createPeer(connection_offer.sdp, connection_offer.type)
 }
 
-function createPeer (sdp) {
+function createPeer (sdp, type) {
     const config = {
         iceServers: [
             { urls: 'stun:stun.l.google.com:19302' },
@@ -21,16 +19,16 @@ function createPeer (sdp) {
         ]
     };
     
-    peer = new RTCPeerConnection(config);
+    const peer = new RTCPeerConnection(config);
     
-    captureCamera(sdp);
+    captureCamera(sdp, type, peer);
 }
 
 async function showDevices() {    
     let devices = (await navigator.mediaDevices.enumerateDevices()).filter(i => i.kind == 'videoinput')
 }
 
-function captureCamera (sdpOffer) {
+function captureCamera (sdp, type, peer) {
     let constraints = {
         audio: false,
         video: true
@@ -43,17 +41,17 @@ function captureCamera (sdpOffer) {
 
             peer.addTrack(track, stream);            
         });
-        return createAnswer(sdpOffer);
+        return createAnswer(sdp, type, peer);
     }, function(err) {
         alert('Could not acquire media: ' + err);
     });
 }
 
 
-async function createAnswer (sdp) {
-    let offer = new RTCSessionDescription({sdp: sdp, type: 'offer'});
+async function createAnswer (sdp, type, peer) {
+    const offer = new RTCSessionDescription({sdp: sdp, type: type});
     await peer.setRemoteDescription(offer);
-    let answer = await peer.createAnswer();
+    const answer = await peer.createAnswer();
 
     await peer.setLocalDescription(answer);
     await new Promise(resolve => {
@@ -74,52 +72,35 @@ async function createAnswer (sdp) {
 }
 
 function applyContraints (videoTrack) {
-    if (videoTrack) {
-    
-        const videoConstraints = {
-            width: { min: 320, max: 1280 },
-            height: { min: 240,  max: 720 },
-            frameRate: {min: 15,  max: 30 }
-        };
-    
-        // Apply video track constraints
-        videoTrack.applyConstraints(videoConstraints)
-            .then(() => {
-                console.log("Video track constraints applied successfully");
-            })
-            .catch((error) => {
-                console.error("Error applying video track constraints:", error);
-                setTimeout(() => {
-                    applyContraints();
-                }, 5000);
-            });
-    
-        // Set content hint to 'motion' or 'detail'
-        videoTrack.contentHint = 'motion';
-    }
-}
+    const videoConstraints = {
+        width: { min: 320, max: 1280 },
+        height: { min: 240,  max: 720 },
+        frameRate: {min: 15,  max: 30 }
+    };
 
-async function waitToCompleteIceGathering(pc, logPerformance) {
-    const t0 = performance.now()
-  
-    let p = new Promise((resolve) => {
-      setTimeout(function () {
-        resolve(pc.localDescription)
-      }, 2500)
-      pc.onicegatheringstatechange = (ev) =>
-        pc.iceGatheringState === "complete" && resolve(pc.localDescription)
-    })
-  
-    return p
-  }
+    // Apply video track constraints
+    videoTrack.applyConstraints(videoConstraints)
+        .then(() => {
+            console.log("Video track constraints applied successfully");
+        })
+        .catch((error) => {
+            console.error("Error applying video track constraints:", error);
+            setTimeout(() => {
+                applyContraints();
+            }, 5000);
+        });
+
+    // Set content hint to 'motion' or 'detail'
+    videoTrack.contentHint = 'motion';
+}
 
 function sendAnswerToBrowser(sdp, type) {
     fetch("http://172.20.167.248:8000/answer", {
         method: "post",
         headers: {
-            'Content-Type': 'text/plain'
+            "Content-Type": "application/json"
         },
-        body: {"sdp": sdp, "type": type}
+        body: JSON.stringify({"sdp": sdp, "type": type})
     })
 }
 
