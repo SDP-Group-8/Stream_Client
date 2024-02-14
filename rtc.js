@@ -6,7 +6,7 @@ async function getOffer() {
                 'Content-Type': 'text/plain'
             }
         })
-    const connection_offer = response.json()
+    const connection_offer = await response.json()
     createPeer(connection_offer.sdp, connection_offer.type)
 }
 
