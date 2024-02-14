@@ -1,18 +1,20 @@
 var peer = null;
 let sdp = "";
-fetch("http://172.20.167.248:8000/request-offer",
-{
-    method: "get",
-    headers: {
-        'Content-Type': 'text/plain'
-    }
-})
-.then(response=> response.json())
-.then(data => {
-    createPeer(data.offer)
-});
-function createPeer (offerSDP) {
-    let config = {
+
+async function getOffer() {
+    const response = await fetch("http://172.20.167.248:8000/request-offer",
+        {
+            method: "get",
+            headers: {
+                'Content-Type': 'text/plain'
+            }
+        })
+    const connection_offer = response.json()
+    createPeer(connection_offer.sdp)
+}
+
+function createPeer (sdp) {
+    const config = {
         iceServers: [
             { urls: 'stun:stun.l.google.com:19302' },
             { urls: 'stun:stun2.l.google.com:19302' }
@@ -21,12 +23,11 @@ function createPeer (offerSDP) {
     
     peer = new RTCPeerConnection(config);
     
-    captureCamera(offerSDP);
+    captureCamera(sdp);
 }
 
 async function showDevices() {    
-    let devices = (await navigator.mediaDevices.enumerateDevices()).filter(i=> i.kind == 'videoinput')
-    console.log(devices)
+    let devices = (await navigator.mediaDevices.enumerateDevices()).filter(i => i.kind == 'videoinput')
 }
 
 function captureCamera (sdpOffer) {
@@ -69,7 +70,7 @@ async function createAnswer (sdp) {
         }
     });
 
-    sendAnswerToBrowser(peer.localDescription.sdp);
+    sendAnswerToBrowser(peer.localDescription.sdp, peer.localDescription.type);
 }
 
 function applyContraints (videoTrack) {
@@ -112,12 +113,12 @@ async function waitToCompleteIceGathering(pc, logPerformance) {
     return p
   }
 
-function sendAnswerToBrowser(answerSDP) {
+function sendAnswerToBrowser(sdp, type) {
     fetch("http://172.20.167.248:8000/answer", {
         method: "post",
         headers: {
             'Content-Type': 'text/plain'
         },
-        body: answerSDP
-    }).then(response=> response.json())
+        body: {"sdp": sdp, "type": type}
+    })
 }
