@@ -1,12 +1,14 @@
+const PI_IDENTIFIER = "pi"
+
 async function getOffer() {
-    const response = await fetch("http://172.20.167.248:8000/request-offer",
+    const params = new URLSearchParams({"host_id": PI_IDENTIFIER})
+    const url = "http://172.20.167.248:8000/request-offer?" + params;
+    console.log(url)
+    const response = await fetch(url,
         {
             method: "get",
-            headers: {
-                'Content-Type': 'text/plain'
-            }
         })
-    const connection_offer = await response.json()
+    connection_offer = await response.json()
     createPeer(connection_offer.sdp, connection_offer.type)
 }
 
@@ -99,7 +101,7 @@ function sendAnswerToBrowser(sdp, type) {
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({"sdp": sdp, "type": type})
+	body: JSON.stringify({"sdp": sdp, "type": type, "host_id": PI_IDENTIFIER})
     })
 }
 
