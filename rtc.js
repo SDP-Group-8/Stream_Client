@@ -4,11 +4,19 @@ const SUBNET = "171.203"
 async function getOffer() {
     const params = new URLSearchParams({"host_id": PI_IDENTIFIER})
     const url = `http://172.20.${SUBNET}:8000/request-offer?` + params;
-    console.log(url)
-    const response = await fetch(url,
-        {
+    
+    const getResponse = async () => {
+        return await fetch(url, {
             method: "get",
         })
+    }
+
+    let response = getResponse()
+    while((await response).status != 200) {
+        response = getResponse()
+        await new Promise(r => setTimeout(r, 2000))
+    }
+    
     connection_offer = await response.json()
     createPeer(connection_offer.sdp, connection_offer.type)
 }
@@ -102,7 +110,7 @@ function sendAnswerToBrowser(sdp, type) {
         headers: {
             "Content-Type": "application/json"
         },
-	body: JSON.stringify({"sdp": sdp, "type": type, "host_id": PI_IDENTIFIER})
+	    body: JSON.stringify({"sdp": sdp, "type": type, "host_id": PI_IDENTIFIER})
     })
 }
 
