@@ -11,9 +11,9 @@ async function getOffer() {
         })
     }
 
-    let response = getResponse()
-    while((await response).status != 200) {
-        response = getResponse()
+    let response = await getResponse()
+    while(response.status != 200) {
+        response = await getResponse()
         await new Promise(r => setTimeout(r, 2000))
     }
     
