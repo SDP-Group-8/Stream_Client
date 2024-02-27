@@ -4,7 +4,7 @@ const PI_IDENTIFIER = "pi"
 
 async function getOffer() {
     const params = new URLSearchParams({"host_id": PI_IDENTIFIER})
-    const url = `http://${import.meta.env.BASE_URL}:8000/request-offer?` + params;
+    const url = `http://${import.meta.env.VITE_SERVER_URL}:8000/request-offer?` + params;
     
     const getResponse = async () => {
         return await fetch(url, {
