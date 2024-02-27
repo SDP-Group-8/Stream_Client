@@ -1,15 +1,10 @@
-const webpack = require("webpack")
-
-new webpack.EnvironmentPlugin({
-    SERVER_IP: "172.20.167.247"
-})
+import './App.css'
 
 const PI_IDENTIFIER = "pi"
-const SUBNET = process.env.SERVER_IP ? process.env.SERVER_IP : "167.247"
 
 async function getOffer() {
     const params = new URLSearchParams({"host_id": PI_IDENTIFIER})
-    const url = `http://172.20.${SUBNET}:8000/request-offer?` + params;
+    const url = `http://${import.meta.env.VITE_SERVER_URL}:8000/request-offer?` + params;
     
     const getResponse = async () => {
         return await fetch(url, {
@@ -27,8 +22,15 @@ async function getOffer() {
     createPeer(connection_offer.sdp, connection_offer.type)
 }
 
-function createPeer (sdp, type) {    
-    const peer = new RTCPeerConnection();
+function createPeer (sdp, type) {
+    const config = {
+        iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun2.l.google.com:19302' }
+        ]
+    };
+    
+    const peer = new RTCPeerConnection(config);
     
     captureCamera(sdp, type, peer);
 }
@@ -55,7 +57,6 @@ function captureCamera (sdp, type, peer) {
         alert('Could not acquire media: ' + err);
     });
 }
-
 
 async function createAnswer (sdp, type, peer) {
     const offer = new RTCSessionDescription({sdp: sdp, type: type});
@@ -113,4 +114,13 @@ function sendAnswerToBrowser(sdp, type) {
     })
 }
 
-getOffer()
+function App() {
+  getOffer()
+
+  return (
+    <>
+    </>
+  )
+}
+
+export default App
