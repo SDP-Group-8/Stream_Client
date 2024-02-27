@@ -1,5 +1,11 @@
+const webpack = require("webpack")
+
+new webpack.EnvironmentPlugin({
+    SERVER_IP: "172.20.167.247"
+})
+
 const PI_IDENTIFIER = "pi"
-const SUBNET = "171.203"
+const SUBNET = process.env.SERVER_IP ? process.env.SERVER_IP : "167.247"
 
 async function getOffer() {
     const params = new URLSearchParams({"host_id": PI_IDENTIFIER})
@@ -21,15 +27,8 @@ async function getOffer() {
     createPeer(connection_offer.sdp, connection_offer.type)
 }
 
-function createPeer (sdp, type) {
-    const config = {
-        iceServers: [
-            { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:stun2.l.google.com:19302' }
-        ]
-    };
-    
-    const peer = new RTCPeerConnection(config);
+function createPeer (sdp, type) {    
+    const peer = new RTCPeerConnection();
     
     captureCamera(sdp, type, peer);
 }
