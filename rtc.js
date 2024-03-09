@@ -1,9 +1,8 @@
 const PI_IDENTIFIER = "pi"
-const SUBNET = "171.203"
 
 async function getOffer() {
     const params = new URLSearchParams({"host_id": PI_IDENTIFIER})
-    const url = `http://172.20.${SUBNET}:8000/request-offer?` + params;
+    const url = `http://${ADDRESS}:8000/request-offer?` + params;
     
     const getResponse = async () => {
         return await fetch(url, {
@@ -77,7 +76,7 @@ async function createAnswer (sdp, type, peer) {
             peer.addEventListener('icegatheringstatechange', checkState);
         }
     });
-
+ 
     sendAnswerToBrowser(peer.localDescription.sdp, peer.localDescription.type);
 }
 
@@ -105,7 +104,7 @@ function applyContraints (videoTrack) {
 }
 
 function sendAnswerToBrowser(sdp, type) {
-    fetch(`http://172.20.${SUBNET}:8000/answer`, {
+    fetch(`http://${ADDRESS}:8000/answer`, {
         method: "post",
         headers: {
             "Content-Type": "application/json"
